@@ -42,7 +42,7 @@ appendfilename node-1.aof
 ```
 3. Root
 
-### Open python terminal:
+##### Open python terminal:
 ```
 ipython
 ```
