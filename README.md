@@ -1,118 +1,95 @@
-Just some sample files
+# Redis cluster setup
 
-# SIP-Redis-2020
-Sachin Saharan Redis clustering Internship project 2020
+## Modules Used:
+1. redis
+1. rediscluster
+1. redis-trib
 
+## Python virtual environment setup:
+```bash
+mkdir <dir-name>
+cd <dir-name>
 
-Guide to setup a redis cluster and to access it as a client.
-===================================================================================================================
+virtualenv --python=/usr/local/python/python-2.7/std/bin/python --system-site-packages --inherit=/usr/local/python/python-2.7/std <name_of_the_virtualenv>
+```
+### To activate virtual environment:
+```bash
+source <name_of_the_virtualenv>/bin/activate
+```
 
--------------------------------------------------------------------------------------------------------------------
-Modules used to create Redis Cluster:
+## Installing modules
+```
+pip install redis
 
-1) redis-trib
-2) rediscluster
+ pip install redis-trib
 
-Now to install these modules in our system, we need to create a python virtual environment so that we can use pip
-for installation. For that use the following commands:
+ easy_install rediscluster
+ ```
 
--> mkdir 'dir-name'
-  
--> cd 'dir-name'
-  
--> virtualenv --python=/usr/local/python/python-2.7/std/bin/python  --system-site-packages  --inherit=/usr/local/python/python-2.7/std <name_of_the_virtualenv>
+---
 
----To activate the virtual environment use:
+## Cluster Creation on Local System
 
-->source <name_of_the_virtualenv>/bin/activate
-
----Now to install these moduels use:
-
--> pip install redis
-
--> pip install redis-trib
-
--> easy_install rediscluster
-
-----------------------------------------------------------------------------------------------------------------
-
-Redis Cluster Setup:-
-
-1.) Creating a cluster on a local system.
-
-- To create a cluster on a local system we need to provide two neccessary elements for each node:
-a) port (at which node should run)
-b) configuration file ( Which should contain all the cluster related configurations)
-
--- An example for a configuration file is( like redis.conf):
-
+### Attributes passed:
+1. Port
+1. Configuration file
+```
 cluster-enabled yes
-
 cluster-config-file cluster-node-1.conf
-
 cluster-node-timeout 5000
-
 appendonly yes
-
 appendfilename node-1.aof
+```
+3. Root
 
--- We can also provide a root directory for each node, where all its file will be stored (like .conf and .aof files), but
-it is optional.
+### Open python terminal:
+```
+ipython
+```
+### Server side code:
+```python
+from redis_server import ClusterLocal
 
+master_nodes = [{'port': 7001, 'config': 'path/to/config_file', 'root': 'path/to/root'},{'port': 7002, 'config': 'path/to/config_file', 'root': 'path/to/root'},{'port': 7003, 'config': 'path/to/config_file', 'root': 'path/to/root'}]
 
------Now to create a redis cluster(and to perform other operations on cluster), open a python terminal(by using ipython command and being in your virtualenv) and then run the following commands:
+cluster = ClusterLocal(startup_nodes = master_nodes)
 
--> ipython
+# Create cluste of 3 master nodes
+cluster.run()
 
->>> from redis_server import ClusterLocal
+# Add a slave 127.0.0.1:7004 to node 127.0.0.1:7001
+cluster.add_replica(master_port = 7001, slave_node = {'port': 7004, 'config': 'path/to/config_file', 'root': 'path/to/root'})
 
->>> master_nodes = [{'port': 7001, 'config': 'path/to/config_file', 'root': 'path/to/root'},{'port': 7002, 'config': 'path/to/config_file', 'root': 'path/to/root'},{'port': 7003, 'config': 'path/to/config_file', 'root': 'path/to/root'}]
+# Add a new master node 
+cluster.add_node(new_node = {'port': 7005, 'config': 'path/to/config_file'})
 
->>> cluster = ClusterLocal(startup_nodes = master_nodes)
+# Remove the node 127.0.0.1:7002 from the cluster
+# Hash slots will be distributed among other nodes
+cluster.del_node(del_node_port = 7002)
 
->>> cluster.run()     
-/////   Create the cluster of three master nodes
+#  kill 127.0.0.1:7001. Its slave will become new master
+cluster.kill(kill_node_port = 7001)
 
->>> cluster.add_replica(master_port = 7001, slave_node = {'port': 7004, 'config': 'path/to/config_file'})
-//// Add a replica node running at port 7004 on a master node running at port 7001
+# Transfer hash slots from one node to the other
+cluster.migrate(source_node_port = 7004, dest_node_port = 7005, slot_begin = 30, slot_end = 200 )
 
->>> cluster.add_node(new_node = {'port': 7005, 'config': 'path/to/config_file'})
-//// Add a new master node into the cluster (Without any hash slots)
+# Rescue the cluster with failed slots
+cluster.rescue(alive_node_port = 7003, rescue_node = {'port': 7006, 'config': 'path/to/config_file'})
 
->>> cluster.del_node(del_node_port = 7002)
-//// Delete a node running on port 7002. All the slots(and key-values inside the slots) in node 7002 will be distributed among other master nodes. Remember that a node can only be deleted if it doesn't have any slave nodes.
+# Shutdown the cluster with a single node
+cluster.shutdown(last_port = 7004) 
+```
+### Client side code:
 
->>> cluster.kill(kill_node_port = 7001)
-/// kill the node 127.0.0.1:7001. So now it's slave will be elected as a new master
+```python
+from redis_handle import RedisHandle
 
->>> cluster.migrate(source_node_port = 7004, dest_node_port = 7005, slot_begin = 30, slot_end = 200 )
-///  Transfer the slots from source node(7004) to destination node(7005). The range of slots transferred are from 
- slot_begin to slot_end. Please notice that initially, all the slots must belongs to the source node.
+# port that is in the cluster
+cluster = RedisHandle([{'host':'127.0.0.1', 'port': 7001}])  
 
->>> cluster.rescue(alive_node_port = 7003, rescue_node = {'port': 7006, 'config': 'path/to/config_file'})
-///  127.0.0.1:7003 is one of the nodes that is still alive in the cluster
-and 127.0.0.1:7006 is the node that would take care of all failed slots
+client = cluster.client()
 
->>> cluster.shutdown(last_port = 7004)
-/// To shutdown the cluster when there is just a single node left in the cluster
+client.set('foo', 'bar')
 
-
----- To access the cluster as a client use following commands:
-
--> ipython
-
->>> from redis_handle import RedisHandle
-
->>> clust = RedisHandle([{'host':'127.0.0.1', 'port': 7001}])
-//// port that is provided has to be in the cluster
-
->>> client = clust.client()
-
->>> client.set('foo', 'bar')
-
->>> print(client.get('foo'))
-
-
--------------------------------------------------------------------------------------------------------------------------------
-
-
+print(client.get('foo'))
+```
