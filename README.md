@@ -168,6 +168,13 @@ sentinel monitor <master-group-name> <ip> <port> <quorum>
 > For more information please visit [Redis Sentinel Documentation](https://redis.io/topics/sentinel)
 
 ---
+## Configuring Slave
+
+To start a node as a slave node it's configuration file must contain:
+```
+slaveof <master_node_ip> <master_node_port>
+```
+---
 
 ## Running Sentinel on local system
 
