@@ -261,8 +261,8 @@ Example:
 ```
 sdmadm --create
 svcname: u/USER/redis-cluster
-command: sdexec -s u/USER/redis-cluster -- /u/saharan/redis-clustering/my27env/bin/python -m/u/USER/redis_server u/USER/redis-cluster 
--j /u/saharan/node_files/masters.json
+command: sdexec -s u/USER/redis-cluster -- /u/saharan/redis-clustering/my27env/bin/python -m/u/USER/redis_server
+u/USER/redis-cluster -j /u/saharan/node_files/masters.json
 ```
 Set:
 * master = public
