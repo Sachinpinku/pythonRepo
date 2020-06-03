@@ -226,5 +226,63 @@ client.get("foo")
 }
 
 ```
+---
+---
+
+# Running redis cluster using sdmadm command
+
+## Providing master and slave configurations
+
+To provide master and slave configurations we can use .json files to 
+store the configurations in object form.
+
+Example file:
+```json
+{
+"1":{"port":7001,"root":"/u/saharan/cluster/7001","config":"/u/saharan/cluster-3/7001/redis.conf","slaves":[{"port":7004,"root":"/u/saharan/cluster/7004","config":"/u/saharan/cluster-3/7004/redis.conf"}]},
+
+"2":{"port":7002,"root":"/u/saharan/cluster/7002","config":"/u/saharan/cluster-3/7002/redis.conf","slaves":[{"port":7005,"root":"/u/saharan/cluster/7005","config":"/u/saharan/cluster-3/7005/redis.conf"}]},
+
+"3":{"port":7003,"root":"/u/saharan/cluster/7003","config":"/u/saharan/cluster-3/7003/redis.conf","slaves":[{"port":7006,"root":"/u/saharan/cluster/7006","config":"/u/saharan/cluster-3/7006/redis.conf"}]}
+}
+```
+
+## To run a cluster use:
+```
+sdmadm --create
+svcname: <service_name>
+command: sdexec -s <service_name> -- <path_to_python_executable> -m<path_to_redis_server_file> -j <path_to_json_configuration_file>
+```
+Example:
+```
+sdmadm --create
+svcname: u/USER/redis-cluster
+command: sdexec -s u/USER/redis-cluster -- /u/saharan/redis-clustering/my27env/bin/python -m/u/USER/redis_server -j /u/saharan/node_files/masters.json
+```
+Set:
+* master = public
+* resource domain = hyd.deshaw.com
+* stability = production
+
+---
+
+## To Connect to a running server
+
+```python
+from deshaw.db.redis_handle import RedisHandle
+
+cluster = RedisHandle(arg = 'u/USER/redis-cluster', iscluster = True)
+
+client = cluster.client()
+
+print(client.cluster_slots())
+
+client.set('foo', 'bar')
+
+print(client.get('foo'))
+```
+
+
+
 
 
