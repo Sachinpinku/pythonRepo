@@ -216,7 +216,15 @@ client.set("foo","bar")
 
 client.get("foo")
 ```
+---
+---
 
+```json
+{"1":{"port":7001,"root":"/u/saharan/cluster/7001","config":"/u/saharan/cluster-3/7001/redis.conf","slaves":[{"port":7004,"root":"/u/saharan/cluster/7004","config":"/u/saharan/cluster-3/$
+"2":{"port":7002,"root":"/u/saharan/cluster/7002","config":"/u/saharan/cluster-3/7002/redis.conf","slaves":[{"port":7005,"root":"/u/saharan/cluster/7005","config":"/u/saharan/cluster-3/7$
+"3":{"port":7003,"root":"/u/saharan/cluster/7003","config":"/u/saharan/cluster-3/7003/redis.conf","slaves":[{"port":7006,"root":"/u/saharan/cluster/7006","config":"/u/saharan/cluster-3/7$
+}
 
+```
 
 
