@@ -254,13 +254,15 @@ Example file:
 ```
 sdmadm --create
 svcname: <service_name>
-command: sdexec -s <service_name> -- <path_to_python_executable> -m<path_to_redis_server_file> -j <path_to_json_configuration_file>
+command: sdexec -s <service_name> -- <path_to_python_executable> -m<path_to_redis_server_file> <service_name>
+-j <path_to_json_configuration_file>
 ```
 Example:
 ```
 sdmadm --create
 svcname: u/USER/redis-cluster
-command: sdexec -s u/USER/redis-cluster -- /u/saharan/redis-clustering/my27env/bin/python -m/u/USER/redis_server -j /u/saharan/node_files/masters.json
+command: sdexec -s u/USER/redis-cluster -- /u/saharan/redis-clustering/my27env/bin/python -m/u/USER/redis_server u/USER/redis-cluster 
+-j /u/saharan/node_files/masters.json
 ```
 Set:
 * master = public
