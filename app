@@ -46,6 +46,7 @@ a = {2,3,1,4,'fhf'}
 b={2,1,'fhf',5,'sach'}
 c=a.difference(b)
 print(c)
+print("hello World")
 try:
     d = {2:'hello',5:'hii'}
     print(d[0])
@@ -58,4 +59,5 @@ try:
     t=t*3
 except NameError as err:
     print(err)
+
 
